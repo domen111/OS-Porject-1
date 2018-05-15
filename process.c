@@ -31,6 +31,6 @@ int main(int argc, char* argv[]){
     long long end_time_ns = end_time % n;
 
     printf("[project1] %d %s.%s %lld.%lld\n", pid, start_time_s, start_time_ns, end_time_s, end_time_ns);
-    syscall(337, pid, start_time_s * 1000000000l, start_time_s / 1000000000l, end_time_s);
+    //syscall(337, pid, start_time_s * 1000000000l, start_time_s / 1000000000l, end_time_s);
     return 0;
 }
