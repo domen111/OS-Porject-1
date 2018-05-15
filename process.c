@@ -16,8 +16,9 @@ int main(int argc, char* argv[]){
     pid_t pid = getpid();
     int exec_time;
     exec_time = strtol(argv[2], NULL, 10);
-    char* start_time_s = argv[3];
-    char* start_time_ns = argv[4];
+    //char* start_time_s = argv[3];
+    //char* start_time_ns = argv[4];
+    long start_time = syscall(334);
 
 
     int i;
@@ -26,11 +27,12 @@ int main(int argc, char* argv[]){
         for(j = 0; j < 1000000UL; j++); 
     }
     
-    long long end_time = syscall(334);
+    long end_time = syscall(334);
     long long end_time_s = end_time / n;
     long long end_time_ns = end_time % n;
 
-    printf("[project1] %d %s.%s %lld.%lld\n", pid, start_time_s, start_time_ns, end_time_s, end_time_ns);
-    //syscall(337, pid, start_time_s * 1000000000l, start_time_s / 1000000000l, end_time_s);
+    //printf("[project1] %d %s.%s %lld.%lld\n", pid, start_time_s, start_time_ns, end_time_s, end_time_ns);
+    printf("[Project1] %d %ld.%ld %ld.%ld\n", pid, start_time/1000000000l%1000, start_time%1000000000l, end_time/1000000000l%1000, end_time%1000000000l);
+    syscall(337, pid, start_time, end_time);
     return 0;
 }

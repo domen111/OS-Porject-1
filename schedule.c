@@ -19,8 +19,8 @@
 #define MAX_PROCESS_NUM (int)1E1
 #define TIME_QUANTUM (int)5E2
 #define N (long long)1E9
-#define PRIORITYH (int)80;
-#define PRIORITYL (int)10;
+#define PRIORITYH (int)80
+#define PRIORITYL (int)10
 #define PRIORITYINIT (int)50;
 
 int cur_process_num = 0;
@@ -94,7 +94,7 @@ int Exec_Process(PROCESS **waiting_list, int policy){
       waiting_list[0]->exec_time = 0;
       waiting_list[0] = NULL;
     }
-    for(int i = 1;i<=cur_process_num;i++){
+    for(int i = 1;i<cur_process_num;i++){
       PROCESS *temp = waiting_list[i];
       waiting_list[i] = waiting_list[i-1];
       waiting_list[i-1] = temp;
@@ -108,14 +108,14 @@ int Exec_Process(PROCESS **waiting_list, int policy){
   if(policy==PSJF){//one unit per time cause can't be done a single time like the upper ones
     int exec_length;
     waiting_list[0]->exec_time--;
-    if(waiting_list[0] == 0){
+    if(waiting_list[0]->exec_time == 0){
       waiting_list[0] = NULL;
-      //cur_process_num--;
-      //finished_process_num++;
+      cur_process_num--;
+      finished_process_num++;
       for(int i = 1;i<=cur_process_num;i++){
-      PROCESS *temp = waiting_list[i];
-      waiting_list[i] = waiting_list[i-1];
-      waiting_list[i-1] = temp;
+        PROCESS *temp = waiting_list[i];
+        waiting_list[i] = waiting_list[i-1];
+        waiting_list[i-1] = temp;
       }
     }
     if(waiting_list[cur_process_num-1]==NULL){
@@ -129,9 +129,9 @@ int Exec_Process(PROCESS **waiting_list, int policy){
 int main(){
   PROCESS P[MAX_PROCESS_NUM];
   char policy_name[5];
+  int num_process;
   char process_name[MAX_NAME_LENGTH];
   scanf("%s",policy_name);
-  int num_process;
   scanf("%d",&num_process);
 
 ////init process////
@@ -153,7 +153,7 @@ int main(){
     if(strcmp(policy_name,policy_list[i])==0)
       policy = i;
 
-////process queueing////
+////process queue initializing////
   PROCESS *waiting_list[MAX_PROCESS_NUM];
   for(int i = 0;i<MAX_PROCESS_NUM;i++)
     waiting_list[i] = NULL;
@@ -170,7 +170,7 @@ int main(){
   param.sched_priority = PRIORITYINIT;
   pid_t pidP = getpid();
   if(sched_setscheduler(pidP,SCHED_FIFO,&param)!=0){
-    printf("fuck\n");
+    //printf("fuck\n");
     perror("sched_setscheduler error");
     exit(EXIT_FAILURE);
   }
@@ -184,9 +184,9 @@ int main(){
   int exec_length = 0;
   pid_t pids[MAX_PROCESS_NUM];
   while(!(finished_process_num==num_process && exec_length==0)){
-    long long start_time = syscall(SYSCALLNUM);
-    long long start_time_s = start_time/N;
-    long long start_time_ns = start_time%N;
+    //long long start_time = syscall(SYSCALLNUM);
+    //long long start_time_s = start_time/N;
+    //long long start_time_ns = start_time%N;
     while(P[fork_count].ready_time<=time_count && fork_count < num_process){
       pid_t pid = fork();
       if(pid<0){
@@ -196,11 +196,11 @@ int main(){
       else if(pid==0){
         char exec_time[10];
         sprintf(exec_time,"%d",P[fork_count].exec_time);
-        char start_time_s_string[20];
-        char start_time_ns_string[20];
-        sprintf(start_time_s_string,"%lld",start_time_s);
-        sprintf(start_time_ns_string,"%lld",start_time_ns);
-        if(execlp("./process","process",P[fork_count].name,exec_time,start_time_s_string,start_time_ns_string,(char*)NULL)<0){
+        //char start_time_s_string[20];
+        //char start_time_ns_string[20];
+        //sprintf(start_time_s_string,"%lld",start_time_s);
+        //sprintf(start_time_ns_string,"%lld",start_time_ns);
+        if(execlp("./process","process",P[fork_count].name,exec_time/*,start_time_s_string,start_time_ns_string*/,(char*)NULL)<0){
           perror("execlp error");
           exit(EXIT_FAILURE);
         }
@@ -229,11 +229,11 @@ int main(){
         if(exec_process_last==NULL || exec_process_last->exec_time==0){
           //printf("Set %s to high at time %d\n",exec_process->name,time_count);
           pid_t pid = pids[exec_process->ID];
-          printf("PID: %d\n",pid);
+          //printf("PID: %d\n",pid);
           param.sched_priority = PRIORITYH;
           if(sched_setscheduler(pid,SCHED_RR,&param)!=0){
-            printf("haha\n");
-	    perror("sched_setscheduler error");
+            //printf("haha\n");
+	        perror("sched_setscheduler error");
             exit(EXIT_FAILURE);
           }
           //if(sched_getscheduler(pid)==SCHED_RR)
@@ -243,16 +243,16 @@ int main(){
           //printf("Set %s to high, recover %s to low at time %d\n",exec_process->name,exec_process_last->name,time_count);
           pid_t pid_last = pids[exec_process_last->ID];
           pid_t pid = pids[exec_process->ID];
-          printf("PID: %d\n",pid);
+          //printf("PID: %d\n",pid);
           param.sched_priority = PRIORITYL;
           if(sched_setscheduler(pid_last,SCHED_RR,&param)!=0){
-            printf("hehe\n");
+            //printf("hehe\n");
             perror("sched_setscheduler error");
             exit(EXIT_FAILURE);
           }
           param.sched_priority = PRIORITYH;
           if(sched_setscheduler(pid,SCHED_FIFO,&param)!=0){
-            printf("hoho\n");
+            //printf("hoho\n");
             perror("sched_setscheduler error");
             exit(EXIT_FAILURE);
           }
